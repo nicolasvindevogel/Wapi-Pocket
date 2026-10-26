@@ -1,0 +1,22 @@
+<!doctype html><html lang="fr"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#f7f9fc"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="description" content="WAPI POCKET — compagnon mobile WAPILOT"><title>WAPI POCKET · DL Groupe</title>
+<link rel="manifest" href="./manifest.webmanifest"><link rel="apple-touch-icon" href="./icons/apple-touch-icon.png"><link rel="icon" href="./icons/icon-192.png"><link rel="stylesheet" href="./styles.css">
+<script defer src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script><script defer src="./app.js"></script>
+</head><body>
+<div id="screen-login" class="login-screen">
+ <div class="login-wrap"><div class="login-brand"><img src="./icons/icon-192.png" alt="Logo WAPI POCKET"><span>WAPI POCKET<small>Votre WAPILOT, sur le terrain.</small></span></div>
+ <section class="panel login-panel"><h1>Bienvenue</h1><p class="muted">Connectez-vous avec <b>vos identifiants habituels WAPILOT</b>.</p>
+ <form id="login-form"><label>E-mail professionnel<input name="email" type="email" autocomplete="username" required placeholder="adresse@dl-groupe.be"></label>
+ <label>Mot de passe<input name="password" type="password" autocomplete="current-password" required placeholder="Votre mot de passe"></label>
+ <button class="primary wide" id="btn-login" type="submit">Se connecter</button></form>
+ <button class="link" id="btn-reset" type="button">Mot de passe oublié ?</button><p id="login-message" role="status" class="small status-text"></p></section>
+ <div class="tiny muted centered">Accès professionnel · Données partagées avec WAPILOT</div></div></div>
+<div id="app" class="app hidden">
+ <header class="topbar"><div class="brand-lockup"><img src="./icons/icon-192.png" alt=""><span><b>WAPI POCKET</b><small id="user-title">Connecté à WAPILOT</small></span></div><div class="head-actions"><button id="sync" class="round" aria-label="Actualiser">↻</button><button id="account" class="round avatar" aria-label="Compte">●</button></div></header>
+ <div id="context" class="context hidden"><span id="context-name"></span><button id="clear-context" aria-label="Retirer filtre">×</button></div>
+ <div id="banner" class="banner hidden" role="status"></div>
+ <main id="main" class="main" tabindex="-1"></main>
+ <nav class="nav" aria-label="Navigation principale"><button data-page="home" class="active"><span>⌂</span>Accueil</button><button data-page="mails"><span>✉</span>Mails</button><button data-page="capture" class="nav-capture"><span>＋</span>Capturer</button><button data-page="tasks"><span>☷</span>Tâches</button><button data-page="copros"><span>▦</span>Copros</button></nav>
+</div><div id="modal-root"></div><div id="toast" role="status" class="toast hidden"></div>
+</body></html>
