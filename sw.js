@@ -1,7 +1,7 @@
 // Ressources publiques uniquement : jamais de cache des réponses Supabase / Microsoft.
 // L'interface fonctionne de manière fluide même si le réseau répond lentement.
-const CACHE='wapi-pocket-v2-connected-3-0';
-const FILES=['./','./index.html','./app.js?v=30','./mobile_modules.js?v=30','./gps.js?v=30','./styles.css?v=30','./pocket_plus.js?v=30','./manifest.webmanifest','./icons/wp-v22-192.png','./icons/wp-v22-512.png','./icons/wp-v22-maskable.png','./icons/wp-v22-apple.png'];
+const CACHE='wapi-pocket-v2-connected-3-0-1-ios-icon';
+const FILES=['./','./index.html','./app.js?v=301','./mobile_modules.js?v=301','./gps.js?v=301','./styles.css?v=301','./pocket_plus.js?v=301','./manifest.webmanifest?v=301','./apple-touch-icon.png','./apple-touch-icon-v301.png','./icons/wp-v301-apple-180.png','./icons/wp-v301-apple-167.png','./icons/wp-v301-apple-152.png','./icons/wp-v301-192.png','./icons/wp-v301-512.png','./icons/wp-v301-maskable.png'];
 self.addEventListener('install',event=>{
  event.waitUntil(caches.open(CACHE).then(cache=>cache.addAll(FILES)).then(()=>self.skipWaiting()));
 });
@@ -13,7 +13,7 @@ self.addEventListener('fetch',event=>{
  const url=new URL(req.url),scope=new URL(self.registration.scope);
  if(url.origin!==scope.origin||!url.pathname.startsWith(scope.pathname))return;
  const isPage=req.mode==='navigate'||/\/(?:index\.html)$/.test(url.pathname)||url.pathname===scope.pathname;
- const asset=/\/(?:app\.js|gps\.js|mobile_modules\.js|pocket_plus\.js|styles\.css|manifest\.webmanifest|wp-v22-[^/]+\.png)$/.test(url.pathname);
+ const asset=/\/(?:app\.js|gps\.js|mobile_modules\.js|pocket_plus\.js|styles\.css|manifest\.webmanifest|apple-touch-icon(?:-v301)?\.png|wp-v301-[^/]+\.png)$/.test(url.pathname);
  if(!isPage&&!asset)return;
  if(asset){
   event.respondWith(caches.match(req).then(hit=>hit||fetch(req).then(resp=>{
