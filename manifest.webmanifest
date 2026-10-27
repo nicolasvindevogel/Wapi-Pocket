@@ -1,7 +1,7 @@
 {
   "name": "WAPI POCKET · WAPILOT",
   "short_name": "WAPI POCKET",
-  "description": "WAPILOT mobile · WAPI POCKET 2.4 GPS connecté à WAPILOT",
+  "description": "WAPILOT mobile · WAPI POCKET V2.6 · Agenda collaboratif, DL TECHNIK et GPS",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",
