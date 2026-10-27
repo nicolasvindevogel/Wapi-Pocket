@@ -1,8 +1,8 @@
 <!doctype html><html lang="fr"><head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#f7f9fc"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="description" content="WAPI POCKET — compagnon mobile WAPILOT"><title>WAPI POCKET · WAPILOT</title>
-<link rel="manifest" href="./manifest.webmanifest"><link rel="apple-touch-icon" href="./icons/wp-v22-apple.png"><link rel="icon" href="./icons/wp-v22-192.png"><link rel="stylesheet" href="./styles.css?v=22">
-<script defer src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script><script defer src="./app.js?v=22"></script>
+<link rel="manifest" href="./manifest.webmanifest"><link rel="apple-touch-icon" href="./icons/wp-v22-apple.png"><link rel="icon" href="./icons/wp-v22-192.png"><link rel="stylesheet" href="./styles.css?v=23">
+<script defer src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script><script defer src="./gps.js?v=23"></script><script defer src="./app.js?v=23"></script>
 </head><body>
 <div id="screen-login" class="login-screen">
  <div class="login-wrap"><div class="login-brand"><svg xmlns="http://www.w3.org/2000/svg" class="brand-symbol" width="46" height="46" viewBox="0 0 48 48"><rect x="2" y="2" width="44" height="44" rx="13" fill="#087445"/><path d="M11 17.5 17.4 32 24 19.5 30.6 32 37 17.5" fill="none" stroke="#fff" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"/><path d="M24 10.5v6.2" stroke="#BFE8D1" stroke-width="2.5" stroke-linecap="round"/><path d="m24 8 3 4h-6l3-4Z" fill="#fff"/><circle cx="24" cy="37" r="2" fill="#BFE8D1"/></svg><span>WAPI POCKET<small>WAPILOT · Votre espace mobile</small></span></div>
@@ -17,6 +17,6 @@
  <div id="context" class="context hidden"><span id="context-name"></span><button id="clear-context" aria-label="Retirer filtre">×</button></div>
  <div id="banner" class="banner hidden" role="status"></div>
  <main id="main" class="main" tabindex="-1"></main>
- <nav class="nav" aria-label="Navigation principale"><button data-page="home" class="active"><span>⌂</span>Accueil</button><button data-page="mails"><span>✉</span>Mails</button><button data-page="capture" class="nav-capture"><span>＋</span>Capturer</button><button data-page="tasks"><span>☷</span>Tâches</button><button data-page="copros"><span>▦</span>Copros</button></nav>
+ <button type="button" id="gps-floating" class="gps-floating hidden" aria-label="Ouvrir le trajet GPS en cours">● Trajet GPS en cours</button><nav class="nav" aria-label="Navigation principale"><button data-page="home" class="active"><span>⌂</span>Accueil</button><button data-page="mails"><span>✉</span>Mails</button><button data-page="capture" class="nav-capture"><span>＋</span>Actions</button><button data-page="tasks"><span>☷</span>Tâches</button><button data-page="copros"><span>▦</span>Copros</button></nav>
 </div><div id="modal-root"></div><div id="toast" role="status" class="toast hidden"></div>
 </body></html>

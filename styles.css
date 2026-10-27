@@ -37,3 +37,31 @@
 @media(max-width:385px){.mail-att-card{flex-wrap:wrap}.mail-att-actions{margin-left:auto}.mail-att-name{flex-basis:64%}.module-fact{gap:7px}}
 .mail-context-hint{margin:8px 0;background:#eff9f5;border:1px solid #d2ece0;border-radius:11px;color:#4a665a;padding:9px 11px;font-size:11px;line-height:1.5}
 .mail-context-hint button{background:none;border:0;color:#087445;font-weight:800;text-decoration:underline;padding:4px}
+/* WAPI POCKET 2.3 — compteur de déplacements (pilote) */
+.gps-quick-actions{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:14px 0}
+.gps-panel{padding:20px 18px;margin:12px 0 20px;display:flex;flex-direction:column;gap:12px}
+.gps-panel h2{margin:0;font-size:18px}.gps-panel p{margin:1px 0;line-height:1.6;font-size:13px;color:#526777}
+.gps-icon{display:grid;place-items:center;width:66px;height:66px;border-radius:20px;background:#e0f4ed;color:#087445;font-size:40px}
+.gps-message{background:#edf7f2;border:1px solid #c5e6da;color:#205e4e;border-radius:12px;padding:12px;font-size:12px;line-height:1.5}
+.gps-caution{background:#fff6e9;color:#7d5628;border-left:3px solid #e3aa54;border-radius:9px;padding:11px;font-size:12px;line-height:1.5;margin:9px 0}
+.gps-big{min-height:54px;font-size:17px}
+.gps-current-head{display:flex;justify-content:space-between;align-items:center;font-size:12px;color:#718493}
+.gps-km{font-size:52px;font-weight:800;letter-spacing:-1.7px;color:#087445;text-align:center;font-variant-numeric:tabular-nums}
+.gps-km small{font-size:20px;color:#4c7067}
+.gps-caption{text-align:center;color:#708496;font-size:12px}
+.gps-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.gps-stats span{display:flex;flex-direction:column;background:#f5f9f9;padding:10px 8px;border-radius:11px;font-size:10px;color:#718493;align-items:center;gap:5px;text-align:center}
+.gps-stats b{font-size:15px;color:#244b42;font-variant-numeric:tabular-nums}
+.gps-sub{font-size:11px!important;color:#718493;text-align:center}
+.gps-actions{display:grid;grid-template-columns:1fr 1fr;gap:10px}.gps-actions button{min-height:52px}
+.gps-review label{margin:10px 0;font-size:13px}.gps-review textarea{min-height:68px}.gps-review button{margin:12px 0 4px}
+.gps-gap-wrap{margin:20px 0}.gps-gap-wrap h2{font-size:17px;margin:0 0 12px}
+.gps-gap{background:#fff7ec;border:1px solid #f0dfc7;color:#815726;border-radius:13px;padding:12px;margin:8px 0;font-size:12px;line-height:1.55}
+.gps-gap small{display:block;margin-top:5px;color:#826e58;font-size:11px}
+.gps-trip-row{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:13px;margin:8px 0}.gps-trip-row b{display:block;font-size:12px}.gps-trip-row small{display:block;color:#789;font-size:11px;line-height:1.5;margin-top:5px}.gps-row-actions{display:flex;gap:4px;flex-shrink:0}
+.gps-row-actions button{font-size:11px;padding:8px 9px;background:#f1f8f4;color:#246c55;border:1px solid #cfe6d9;border-radius:9px;min-height:40px}
+@media(max-width:360px){.gps-quick-actions{grid-template-columns:1fr}.gps-km{font-size:43px}.gps-panel{padding:15px}}
+
+.gps-route svg{width:100%;max-height:220px;display:block}.gps-route small{display:block;margin-top:4px}
+
+.gps-floating{position:fixed;z-index:19;bottom:calc(82px + env(safe-area-inset-bottom));left:50%;transform:translateX(-50%);border:1px solid #b2d5c5;background:#e6f6ed;color:#086545;border-radius:22px;padding:11px 16px;font-size:12px;font-weight:800;box-shadow:0 4px 14px #1e624c25;white-space:nowrap}
