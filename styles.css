@@ -71,3 +71,20 @@
 .gps-sent{background:#e5f7ef;color:#067548}.gps-unsent{background:#fff1e1;color:#9b5310}
 .gps-row-actions{flex-wrap:wrap;justify-content:flex-end}
 .gps-row-actions button{min-height:36px}
+
+/* WAPI POCKET V2.5 — Adresses GPS et propositions copropriétés */
+.gps-address-block{background:#f6fbf8;border:1px solid #d7eae0;border-radius:14px;padding:12px;margin:12px 0}
+.gps-address-block label{margin:0 0 5px;display:block;font-weight:700}
+.gps-address-hint{display:block;color:#58786b;font-size:11px;line-height:1.5;margin:5px 0}
+.gps-address-notice{border:1px solid #cce6d8;background:#eafaef;color:#315e4d;padding:11px;border-radius:11px;font-size:12px;line-height:1.5}
+.gps-nearby{margin:11px 0 3px}.gps-nearby>b{font-size:12px;color:#25624b;display:block;margin-bottom:8px}
+.gps-copro-option{display:flex;align-items:center;justify-content:space-between;width:100%;text-align:left;gap:9px;padding:10px 9px;margin:6px 0;background:#fff;border:1px solid #cadfd6;border-radius:10px;color:#244c3d;cursor:pointer}
+.gps-copro-option span:first-child{display:flex;flex-direction:column;gap:2px;min-width:0}
+.gps-copro-option strong{font-size:12px}.gps-copro-option small{display:block;font-size:10px;color:#597a6a;overflow-wrap:anywhere}
+.gps-copro-choose{padding:7px 8px;background:#e6f6ed;color:#0b7250;border-radius:8px;font-size:11px;font-weight:800;flex-shrink:0}
+.gps-provider{font-size:10px!important;line-height:1.55!important;color:#718493!important;margin:6px 0 12px!important}
+.gps-geolookup{min-height:44px}
+
+.gps-manual-copro{margin-top:10px;padding-top:8px;border-top:1px solid #deece5}
+.gps-manual-copro label{font-size:11px!important;color:#527061;font-weight:650!important}
+.gps-manual-copro input{font-size:13px}
