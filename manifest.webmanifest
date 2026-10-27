@@ -1,7 +1,7 @@
 {
   "name": "WAPI POCKET · WAPILOT",
   "short_name": "WAPI POCKET",
-  "description": "WAPILOT mobile · WAPI POCKET V2.6 · Agenda collaboratif, DL TECHNIK et GPS",
+  "description": "WAPI POCKET V3.0 : terrain, visites, relances, recherche et agenda",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",
