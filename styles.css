@@ -65,3 +65,9 @@
 .gps-route svg{width:100%;max-height:220px;display:block}.gps-route small{display:block;margin-top:4px}
 
 .gps-floating{position:fixed;z-index:19;bottom:calc(82px + env(safe-area-inset-bottom));left:50%;transform:translateX(-50%);border:1px solid #b2d5c5;background:#e6f6ed;color:#086545;border-radius:22px;padding:11px 16px;font-size:12px;font-weight:800;box-shadow:0 4px 14px #1e624c25;white-space:nowrap}
+
+/* V2.4 — états de synchronisation des trajets WAPILOT */
+.gps-sync-tag{display:inline-flex;align-items:center;border-radius:7px;padding:5px 7px;font-size:11px;font-weight:750;white-space:nowrap}
+.gps-sent{background:#e5f7ef;color:#067548}.gps-unsent{background:#fff1e1;color:#9b5310}
+.gps-row-actions{flex-wrap:wrap;justify-content:flex-end}
+.gps-row-actions button{min-height:36px}

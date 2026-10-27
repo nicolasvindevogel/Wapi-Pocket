@@ -1,7 +1,7 @@
 // Ressources publiques uniquement : jamais de cache des réponses Supabase / Microsoft.
 // L'interface fonctionne de manière fluide même si le réseau répond lentement.
-const CACHE='wapi-pocket-v2-connected-2-3';
-const FILES=['./','./index.html','./app.js?v=23','./gps.js?v=23','./styles.css?v=23','./manifest.webmanifest','./icons/wp-v22-192.png','./icons/wp-v22-512.png','./icons/wp-v22-maskable.png','./icons/wp-v22-apple.png'];
+const CACHE='wapi-pocket-v2-connected-2-4';
+const FILES=['./','./index.html','./app.js?v=24','./gps.js?v=24','./styles.css?v=24','./manifest.webmanifest','./icons/wp-v22-192.png','./icons/wp-v22-512.png','./icons/wp-v22-maskable.png','./icons/wp-v22-apple.png'];
 self.addEventListener('install',event=>{
  event.waitUntil(caches.open(CACHE).then(cache=>cache.addAll(FILES)).then(()=>self.skipWaiting()));
 });

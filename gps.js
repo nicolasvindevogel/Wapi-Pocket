@@ -5,7 +5,7 @@
 'use strict';
 (function(){
  const DB_NAME='wapi-pocket-gps-prototype-v1', MAX_POINTS=20000;
- const S={db:null,uid:null,current:null,trips:[],watchId:null,wakeLock:null,points:[],saving:Promise.resolve(),onChange:()=>{},busy:false,message:'',lastFix:null,hiddenAt:null,pendingHidden:false,tick:null,lastTick:0,lastGoodAt:0};
+ const S={syncFn:null,syncBusy:false,db:null,uid:null,current:null,trips:[],watchId:null,wakeLock:null,points:[],saving:Promise.resolve(),onChange:()=>{},busy:false,message:'',lastFix:null,hiddenAt:null,pendingHidden:false,tick:null,lastTick:0,lastGoodAt:0};
  const htmlEscape=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
  const dateTime=t=>t?new Date(t).toLocaleString('fr-BE',{dateStyle:'short',timeStyle:'short'}):'—';
  const km=m=>(Number(m||0)/1000).toLocaleString('fr-BE',{minimumFractionDigits:2,maximumFractionDigits:2});
@@ -21,7 +21,7 @@
  function persist(){if(S.current)return addSave(S.current)}
  function ping(){const t=Date.now();if(t-S.lastTick>1800){S.lastTick=t;S.onChange()}}
  async function refresh(){if(!S.db||!S.uid)return;const rows=await allTrips();S.trips=rows.filter(x=>x.user_id===S.uid).sort((a,b)=>b.startedAt-a.startedAt);S.onChange()}
- async function init(userId,onChange){if(S.uid&&S.uid!==userId){stopMonitoring();S.current=null;S.trips=[];S.points=[];}S.uid=userId;S.onChange=onChange||(()=>{});if(!S.db)S.db=await openDB();await refresh();if(!S.current){const interrupted=S.trips.find(t=>['recording','interrupted','paused','review'].includes(t.phase));if(interrupted){S.current=interrupted;S.points=await getPoints(interrupted.id);S.lastFix=S.points.at(-1)||null;if(interrupted.phase==='recording'){interrupted.phase='interrupted';interrupted.warnings=(interrupted.warnings||[]).concat({at:Date.now(),text:'Page rechargée ou application interrompue : suivi à reprendre manuellement.'});await persist()}notice('Trajet local récupéré. Vérifiez les éventuelles portions manquantes.')}}S.onChange()}
+ async function init(userId,onChange,syncFn){S.syncFn=typeof syncFn==='function'?syncFn:null;if(S.uid&&S.uid!==userId){stopMonitoring();S.current=null;S.trips=[];S.points=[];}S.uid=userId;S.onChange=onChange||(()=>{});if(!S.db)S.db=await openDB();await refresh();if(!S.current){const interrupted=S.trips.find(t=>['recording','interrupted','paused','review'].includes(t.phase));if(interrupted){S.current=interrupted;S.points=await getPoints(interrupted.id);S.lastFix=S.points.at(-1)||null;if(interrupted.phase==='recording'){interrupted.phase='interrupted';interrupted.warnings=(interrupted.warnings||[]).concat({at:Date.now(),text:'Page rechargée ou application interrompue : suivi à reprendre manuellement.'});await persist()}notice('Trajet local récupéré. Vérifiez les éventuelles portions manquantes.')}}S.onChange()}
  function geoAvailable(){return window.isSecureContext&&navigator.geolocation&&S.db}
  function singleFix(){return new Promise((resolve,reject)=>navigator.geolocation.getCurrentPosition(resolve,reject,{enableHighAccuracy:true,maximumAge:0,timeout:20000}))}
  function normalizedFix(pos){return {lat:pos.coords.latitude,lon:pos.coords.longitude,accuracy:Math.round(pos.coords.accuracy||999),t:pos.timestamp||Date.now()}}
@@ -50,7 +50,58 @@
  async function pause(){if(S.current?.phase!=='recording')return;stopMonitoring();S.current.phase='paused';await persist();notice('Trajet en pause. Les kilomètres de pause ne seront pas comptabilisés.')}
  async function resume(){if(S.busy||!S.current||!['paused','interrupted'].includes(S.current.phase))return;if(!geoAvailable())return notice('GPS ou stockage local indisponible');S.busy=true;S.onChange();try{const old=S.lastFix;const pos=await singleFix();const p=normalizedFix(pos);if(p.accuracy>75)throw Error('Précision insuffisante : '+p.accuracy+' m');const trip=S.current;if(old){trip.gaps=(trip.gaps||[]).concat({startAt:old.t,endAt:p.t,from:{lat:old.lat,lon:old.lon},to:{lat:p.lat,lon:p.lon},lineMeters:Math.round(meters(old,p)),reason:trip.phase==='paused'?'Pause volontaire':'Interruption / reprise de l’application'})}trip.phase='recording';trip.gpsStatus='GPS repris';S.pendingHidden=false;S.points.push(p);S.lastFix=p;await addSave(trip,p);monitor();notice('GPS repris. Vérifiez la portion non enregistrée dans le récapitulatif.')}catch(e){notice('Reprise impossible : '+(e.message||'GPS refusé'))}finally{S.busy=false;S.onChange()}}
  async function stop(){if(!S.current||!['recording','paused','interrupted'].includes(S.current.phase))return;stopMonitoring();S.current.phase='review';S.current.endedAt=Date.now();await persist();notice('Trajet terminé. Vérifiez les kilomètres avant la validation locale.')}
- async function validate(){if(S.current?.phase!=='review')return;const purpose=document.getElementById('gps-purpose')?.value.trim()||'';const value=Number(String(document.getElementById('gps-km')?.value||'').replace(',','.'));const why=document.getElementById('gps-reason')?.value.trim()||'';if(!Number.isFinite(value)||value<0||value>2000)return notice('Indiquez un kilométrage valide.');if(!purpose)return notice('Renseignez le motif du déplacement.');if(Math.abs(value-S.current.distanceM/1000)>0.2&&!why)return notice('Justifiez la différence entre kilomètres GPS et kilomètres validés.');S.current.phase='validated';S.current.validatedKm=value;S.current.purpose=purpose;S.current.reason=why;S.current.validatedAt=Date.now();await persist();S.current=null;S.points=[];S.lastFix=null;await refresh();notice('Trajet validé LOCALement. Aucun envoi dans WAPILOT à ce stade du pilote.')}
+ async function validate(){if(S.current?.phase!=='review')return;
+ const purpose=document.getElementById('gps-purpose')?.value.trim()||'';
+ const value=Number(String(document.getElementById('gps-km')?.value||'').replace(',','.'));
+ const why=document.getElementById('gps-reason')?.value.trim()||'';
+ const origin=document.getElementById('gps-origin')?.value.trim()||'';
+ const destination=document.getElementById('gps-destination')?.value.trim()||'';
+ if(!Number.isFinite(value)||value<0||value>2000)return notice('Indiquez un kilométrage valide.');
+ if(!purpose)return notice('Renseignez le motif du déplacement.');
+ if(Math.abs(value-S.current.distanceM/1000)>0.2&&!why)return notice('Justifiez la différence entre kilomètres GPS et kilomètres validés.');
+ const trip=S.current;
+ trip.phase='validated';trip.validatedKm=value;trip.purpose=purpose;trip.reason=why;
+ trip.origin=origin;trip.destination=destination;trip.validatedAt=Date.now();trip.syncStatus='pending';trip.syncError='';
+ // La sauvegarde locale précède TOUJOURS tout transfert externe.
+ await persist();await S.saving;
+ S.current=null;S.points=[];S.lastFix=null;await refresh();
+ notice('Trajet enregistré localement. Synchronisation avec WAPILOT…');
+ await syncTrip(trip.id);
+}
+async function syncTrip(id,silent=false){
+ const trip=S.trips.find(t=>t.id===id&&t.user_id===S.uid&&t.phase==='validated');
+ if(!trip||trip.syncStatus==='sent'||!S.syncFn)return;
+ // Les anciens trajets pilotes V2.3 ne doivent PAS polluer les relevés RH sans accord explicite.
+ if(!trip.syncStatus){
+  if(silent)return;
+  if(!confirm('Ancien trajet GPS de test V2.3 : voulez-vous vraiment le transmettre dans le registre RH de WAPILOT ?'))return;
+  trip.syncStatus='pending';await txSave(trip);
+ }
+ if(!navigator.onLine){if(!silent)notice('Hors connexion : le trajet est conservé sur ce téléphone. Touchez « Synchroniser » quand le réseau revient.');return}
+ try{
+  await S.saving;
+  // Idempotence côté serveur par (user_id,pocket_trip_id). N'envoie AUCUN point GPS brut.
+  const result=await S.syncFn(trip);
+  if(result!==true)throw Error('Aucune confirmation de sauvegarde Supabase');
+  trip.syncStatus='sent';trip.syncedAt=Date.now();trip.syncError='';
+  await txSave(trip);
+  if(!silent)notice('Trajet transmis à WAPILOT et disponible pour la fiche RH.');
+ }catch(e){
+  trip.syncStatus='pending';trip.syncError=String(e?.message||e).slice(0,280);
+  try{await txSave(trip)}catch(_){}
+  if(!silent)notice('Trajet conservé sur le téléphone, mais NON synchronisé : '+trip.syncError);
+ }
+ S.onChange();
+}
+async function syncPending(silent=false){
+ if(S.syncBusy||!S.uid||!S.db||!S.syncFn)return;
+ S.syncBusy=true;S.onChange();
+ try{await refresh();for(const trip of S.trips.filter(x=>x.phase==='validated'&&x.syncStatus==='pending'))await syncTrip(trip.id,true);
+  const pending=S.trips.filter(x=>x.phase==='validated'&&x.syncStatus==='pending');
+  if(!silent)notice(pending.length?`${pending.length} trajet(s) toujours en attente. Vérifiez la connexion, le SQL et les autorisations Supabase.`:'Tous les trajets validés sont synchronisés avec WAPILOT.');
+ }finally{S.syncBusy=false;S.onChange()}
+}
+
  async function removeTrip(id){const t=S.trips.find(t=>t.id===id);if(!t||t.user_id!==S.uid)return; if(!confirm('Supprimer définitivement ce trajet et ses positions GPS de ce téléphone ?'))return;if(S.current?.id===id){stopMonitoring();S.current=null;S.points=[];S.lastFix=null}await txDelete(id);await refresh();notice('Trajet effacé de ce téléphone.')}
  function filenameSuffix(t){return new Date(t).toISOString().slice(0,10)}
  function saveDownload(data,filename,type){const blob=new Blob([data],{type}),url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download=filename;document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),5000)}
@@ -68,7 +119,7 @@
  const gapCard=g=>`<div class="gps-gap">⚠ ${htmlEscape(g.reason||'Interruption')}<small>${dtms(g.startAt)} – ${dtms(g.endAt)} · Distance directe entre deux points : ${km(g.lineMeters)} km (NON ajoutée)</small></div>`;
  function render(){if(!S.db)return `<section class="gps-panel"><h2>Enregistrement GPS</h2><p class="danger-note">${htmlEscape(S.message||'Initialisation du stockage local…')}</p></section>`;
  const t=S.current,phase=t?.phase;
- let top=`<button class="link" data-gps-action="back">← Retour</button><div class="section-title"><h1>Déplacements GPS</h1><span class="tag">Pilote · 0 €</span></div><p class="sub">Trajets professionnels enregistrés <b>localement sur ce téléphone</b>. Pas encore synchronisés avec WAPILOT.</p>`;
+ let top=`<button class="link" data-gps-action="back">← Retour</button><div class="section-title"><h1>Déplacements GPS</h1><span class="tag">Pilote · 0 €</span></div><p class="sub">Trajets professionnels mesurés sur ce téléphone, puis transmis à WAPILOT après validation. Le tracé GPS brut reste local.</p>`;
  if(S.message)top+=`<div class="gps-message" role="status">${htmlEscape(S.message)}</div>`;
  if(!t)top+=`<section class="card gps-panel"><div class="gps-icon">⌖</div><h2>Nouveau trajet</h2><p>Le GPS comptabilise les kilomètres sur la base de positions successives, y compris lorsque le trajet revient au point de départ.</p><p class="gps-caution">⚠ Un appel, un verrouillage ou un passage en arrière-plan peut couper le suivi de la PWA. Les périodes manquantes sont signalées et ne sont jamais comptées comme des kilomètres réellement mesurés.</p><button class="primary wide gps-big" data-gps-action="start" ${S.busy?'disabled':''}>▶ Démarrer le trajet</button><small>En démarrant, vous autorisez la localisation pour ce trajet professionnel. Le GPS s'arrête à la clôture.</small></section>`;
  else{
@@ -76,19 +127,20 @@
  top+=`<section class="card gps-panel"><div class="gps-current-head"><span class="tag ${phase==='recording'?'ok':''}">${phase==='recording'?'● En cours':phase==='paused'?'⏸ En pause':phase==='review'?'✓ Terminé':'⚠ À reprendre'}</span><span>${htmlEscape(dtms(t.startedAt))}</span></div><div class="gps-km">${km(t.distanceM)} <small>km</small></div><div class="gps-caption">Distance enregistrée par GPS uniquement</div><div class="gps-stats"><span>Durée <b>${String(hours).padStart(2,'0')}:${String(mins).padStart(2,'0')}:${String(secs).padStart(2,'0')}</b></span><span>Points <b>${t.count||0}</b></span><span>Interruptions <b>${t.gaps?.length||0}</b></span></div><p class="gps-sub">${htmlEscape(t.gpsStatus||'GPS en attente')} · Précision dernière position : ${t.lastAccuracy||'—'} m</p>`;
  if(phase==='recording')top+=`<div class="gps-actions"><button class="secondary" data-gps-action="pause">⏸ Pause</button><button class="primary" data-gps-action="stop">■ Terminer</button></div>`;
  if(phase==='paused'||phase==='interrupted')top+=`<div class="gps-actions"><button class="secondary" data-gps-action="resume" ${S.busy?'disabled':''}>▶ Reprendre</button><button class="primary" data-gps-action="stop">■ Terminer</button></div>`;
- if(phase==='review')top+=`<div class="gps-review"><label>Motif professionnel<input id="gps-purpose" maxlength="180" value="${htmlEscape(t.purpose||'Déplacement professionnel')}"></label><label>KM retenus après vérification<input id="gps-km" inputmode="decimal" type="number" min="0" max="2000" step="0.01" value="${(t.distanceM/1000).toFixed(2)}"></label><label>Justification si correction<textarea id="gps-reason" maxlength="500" placeholder="Ex. : appel téléphonique, GPS interrompu, détour…"></textarea></label><button class="primary wide" data-gps-action="validate">✓ Valider localement</button><small>Le kilométrage confirmé et le kilométrage corrigé restent distincts.</small></div>`;
+ if(phase==='review')top+=`<div class="gps-review"><label>Motif professionnel<input id="gps-purpose" maxlength="180" value="${htmlEscape(t.purpose||'Déplacement professionnel')}"></label><label>KM retenus après vérification<input id="gps-km" inputmode="decimal" type="number" min="0" max="2000" step="0.01" value="${(t.distanceM/1000).toFixed(2)}"></label><label>Lieu de départ (facultatif)<input id="gps-origin" maxlength="160" placeholder="Ex. : Agence Mouscron"></label><label>Lieu d’arrivée (facultatif)<input id="gps-destination" maxlength="160" placeholder="Ex. : Agence Mouscron"></label><label>Justification si correction<textarea id="gps-reason" maxlength="500" placeholder="Ex. : appel téléphonique, GPS interrompu, détour…"></textarea></label><button class="primary wide" data-gps-action="validate">✓ Valider et envoyer à WAPILOT</button><small>Les kilomètres GPS et les kilomètres validés restent distincts. Aucun historique précis des positions n’est envoyé pour le rapport RH.</small></div>`;
  top+='</section>';
  if(S.points.length>1)top+=`<section class="card gps-panel gps-route"><h2>Parcours enregistré</h2>${routeSketch(S.points)}</section>`;
  if(t.gaps?.length)top+=`<section class="gps-gap-wrap"><h2>Portions non enregistrées (${t.gaps.length})</h2><p class="gps-caution">La distance directe affichée n'est pas un trajet routier : elle peut être nulle même si un aller-retour a eu lieu. Vérifiez les kilomètres finaux.</p>${t.gaps.slice(-12).map(gapCard).join('')}</section>`;
  if(phase==='recording')top+='<div class="gps-caution">Gardez l’application visible et l’écran allumé pendant les trajets. L’écran peut néanmoins s’éteindre selon les réglages du téléphone.</div>';
  }
  const rows=S.trips.filter(x=>x.phase==='validated').slice(0,20);
- top+=`<section class="section"><div class="section-title"><h2>Historique local</h2><span class="tag">${rows.length}</span></div>${rows.map(x=>`<div class="card gps-trip-row"><div><b>${htmlEscape(x.purpose||'Déplacement')}</b><small>${dateTime(x.startedAt)} · ${km((x.validatedKm??x.distanceM/1000)*1000)} km validés · ${x.gaps?.length||0} interruption(s)</small></div><div class="gps-row-actions"><button type="button" data-gps-action="gpx" data-id="${htmlEscape(x.id)}" aria-label="Exporter GPX">GPX</button><button type="button" data-gps-action="delete" data-id="${htmlEscape(x.id)}" aria-label="Effacer trajet">×</button></div></div>`).join('')||'<div class="empty">Aucun déplacement validé sur ce téléphone.</div>'}<button class="secondary wide" data-gps-action="csv" ${rows.length?'':'disabled'}>⇩ Exporter le relevé CSV (pilote)</button><p class="footer-note">Les trajets de cet historique restent dans ce navigateur, pas dans WAPILOT. Les fichiers GPX contiennent les coordonnées précises. Supprimez les essais après vérification.</p></section>`;
+ top+=`<section class="section"><div class="section-title"><h2>Historique local</h2><span class="tag">${rows.length}</span></div>${rows.map(x=>`<div class="card gps-trip-row"><div><b>${htmlEscape(x.purpose||'Déplacement')}</b><small>${dateTime(x.startedAt)} · ${km((x.validatedKm??x.distanceM/1000)*1000)} km validés · ${x.gaps?.length||0} interruption(s)</small></div><div class="gps-row-actions"><span class="gps-sync-tag ${x.syncStatus==='sent'?'gps-sent':'gps-unsent'}">${x.syncStatus==='sent'?'✓ WAPILOT':x.syncStatus==='pending'?'⚠ À envoyer':'● Ancien essai local'}</span>${x.syncStatus!=='sent'?`<button type="button" data-gps-action="sync-one" data-id="${htmlEscape(x.id)}">${x.syncStatus==='pending'?'↻ Envoyer':'Transférer…'}</button>`:''}<button type="button" data-gps-action="gpx" data-id="${htmlEscape(x.id)}" aria-label="Exporter GPX">GPX</button><button type="button" data-gps-action="delete" data-id="${htmlEscape(x.id)}" aria-label="Effacer trajet local">×</button></div></div>`).join('')||'<div class="empty">Aucun déplacement validé sur ce téléphone.</div>'}<button class="primary wide" data-gps-action="sync-all" ${!rows.some(t=>t.syncStatus==='pending')||S.syncBusy?'disabled':''}>↻ Synchroniser les trajets en attente ${S.syncBusy?'…':''}</button><button class="secondary wide" data-gps-action="csv" ${rows.length?'':'disabled'}>⇩ Exporter mon relevé CSV</button><p class="footer-note">Les anciens essais V2.3 restent locaux tant que vous n’avez pas explicitement demandé leur transfert. Un trajet marqué ✓ WAPILOT apparaît dans Déplacements & km. Un trajet « À envoyer » existe uniquement sur ce téléphone : ne supprimez pas ses données. Le fichier GPX contient des coordonnées précises et n'est jamais transmis automatiquement.</p></section>`;
  return top;
  }
- async function action(type,id){try{switch(type){case 'start':await start();break;case 'pause':await pause();break;case 'resume':await resume();break;case 'stop':await stop();break;case 'validate':await validate();break;case 'csv':await exportCSV();break;case 'gpx':await exportGPX(id);break;case 'delete':await removeTrip(id);break;}S.onChange()}catch(e){notice('Opération GPS non terminée : '+e.message)}}
+ async function action(type,id){try{switch(type){case 'start':await start();break;case 'pause':await pause();break;case 'resume':await resume();break;case 'stop':await stop();break;case 'validate':await validate();break;case 'sync-all':await syncPending();break;case 'sync-one':await syncTrip(id);break;case 'csv':await exportCSV();break;case 'gpx':await exportGPX(id);break;case 'delete':await removeTrip(id);break;}S.onChange()}catch(e){notice('Opération GPS non terminée : '+e.message)}}
  function hidden(){if(!S.current||S.current.phase!=='recording')return;if(document.hidden){S.hiddenAt=Date.now();releaseWake();}else{if(S.hiddenAt&&Date.now()-S.hiddenAt>10000){S.pendingHidden=true;S.current.gpsStatus='Retour à l’écran : vérification de l’interruption GPS';notice('Appel ou verrouillage possible : la portion manquante sera signalée.')}S.hiddenAt=null;requestWake();if(navigator.geolocation){navigator.geolocation.getCurrentPosition(queueFix,()=>{},{enableHighAccuracy:true,timeout:12000,maximumAge:0})}}}
  document.addEventListener('visibilitychange',hidden);
  window.addEventListener('pagehide',()=>{if(S.current?.phase==='recording')S.pendingHidden=true});
- window.WapiGps={init,render,action,stopMonitoring,suspendOnSignout,status:()=>({recording:S.current?.phase==='recording',pending:!!S.current}),onLoginChange:()=>S.onChange(),geoAvailable, _test:{meters,normalize:normalizedFix,rawState:S}};
+ window.addEventListener('online',()=>{if(S.uid)syncPending(true).catch(()=>{})});
+ window.WapiGps={init,render,action,syncPending,stopMonitoring,suspendOnSignout,status:()=>({recording:S.current?.phase==='recording',pending:!!S.current}),onLoginChange:()=>S.onChange(),geoAvailable, _test:{meters,normalize:normalizedFix,rawState:S}};
 })();
