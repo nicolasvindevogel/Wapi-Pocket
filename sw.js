@@ -1,32 +1,16 @@
-// Ressources publiques uniquement : jamais de cache des réponses Supabase / Microsoft.
-// L'interface fonctionne de manière fluide même si le réseau répond lentement.
-const CACHE='wapi-pocket-v2-connected-3-0-2-identity-hexagon';
-const FILES=['./','./index.html','./app.js?v=302','./mobile_modules.js?v=302','./gps.js?v=302','./styles.css?v=302','./pocket_plus.js?v=302','./manifest.webmanifest?v=302','./apple-touch-icon.png','./apple-touch-icon-v302.png','./icons/wp-v302-apple-180.png','./icons/wp-v302-apple-167.png','./icons/wp-v302-apple-152.png','./icons/wp-v302-192.png','./icons/wp-v302-512.png','./icons/wp-v302-maskable.png'];
-self.addEventListener('install',event=>{
- event.waitUntil(caches.open(CACHE).then(cache=>cache.addAll(FILES)).then(()=>self.skipWaiting()));
-});
-self.addEventListener('activate',event=>{
- event.waitUntil(caches.keys().then(keys=>Promise.all(keys.filter(k=>k.startsWith('wapi-pocket-v2-')&&k!==CACHE).map(k=>caches.delete(k)))).then(()=>self.clients.claim()));
-});
-self.addEventListener('fetch',event=>{
- const req=event.request;if(req.method!=='GET')return;
- const url=new URL(req.url),scope=new URL(self.registration.scope);
- if(url.origin!==scope.origin||!url.pathname.startsWith(scope.pathname))return;
- const isPage=req.mode==='navigate'||/\/(?:index\.html)$/.test(url.pathname)||url.pathname===scope.pathname;
- const asset=/\/(?:app\.js|gps\.js|mobile_modules\.js|pocket_plus\.js|styles\.css|manifest\.webmanifest|apple-touch-icon(?:-v302)?\.png|(?:wp-v302|wapi-pocket-logo-v302)[^/]*\.png)$/.test(url.pathname);
- if(!isPage&&!asset)return;
- if(asset){
-  event.respondWith(caches.match(req).then(hit=>hit||fetch(req).then(resp=>{
-   if(resp.ok)event.waitUntil(caches.open(CACHE).then(c=>c.put(req,resp.clone())).catch(()=>{}));
-   return resp;
-  })));
-  return;
- }
- event.respondWith(Promise.race([
-  fetch(req).then(resp=>{
-   if(resp.ok)event.waitUntil(caches.open(CACHE).then(c=>c.put(req,resp.clone())).catch(()=>{}));
-   return resp;
-  }),
-  new Promise((_,reject)=>setTimeout(()=>reject(Error('timeout')),2500))
- ]).catch(()=>caches.match(req).then(hit=>hit||caches.match('./index.html'))));
+// WAPI POCKET V3.0.3 — cache statique uniquement; aucune réponse API/Supabase/Microsoft.
+const CACHE='wapi-pocket-v3-0-3-icons-root-inline';
+const STATIC=['./','./index.html','./app.js?v=303','./mobile_modules.js?v=303','./gps.js?v=303','./styles.css?v=303','./pocket_plus.js?v=303','./manifest.webmanifest?v=303','./apple-touch-icon.png','./apple-touch-icon-v303.png','./apple-touch-icon-v303-152.png','./apple-touch-icon-v303-167.png','./wapi-pocket-icon-v303-192.png','./wapi-pocket-icon-v303-512.png','./wapi-pocket-maskable-v303-512.png'];
+self.addEventListener('install',e=>{e.waitUntil(caches.open(CACHE).then(async c=>{
+  // A failure in a nonessential icon must not block the application update.
+  await Promise.all(STATIC.map(async path=>{try{const res=await fetch(path,{cache:'reload'});if(res.ok)await c.put(path,res)}catch(_){}}));
+}).then(()=>self.skipWaiting()))});
+self.addEventListener('activate',e=>{e.waitUntil(caches.keys().then(keys=>Promise.all(keys.filter(k=>(k.startsWith('wapi-pocket-v2-')||k.startsWith('wapi-pocket-v3-'))&&k!==CACHE).map(k=>caches.delete(k)))).then(()=>self.clients.claim()))});
+self.addEventListener('fetch',e=>{const req=e.request;if(req.method!=='GET')return;
+ const url=new URL(req.url),scope=new URL(self.registration.scope);if(url.origin!==scope.origin||!url.pathname.startsWith(scope.pathname))return;
+ const page=req.mode==='navigate'||/\/index\.html$/.test(url.pathname)||url.pathname===scope.pathname;
+ const asset=/\/(?:app\.js|gps\.js|mobile_modules\.js|pocket_plus\.js|styles\.css|manifest\.webmanifest|apple-touch-icon(?:-v303(?:-152|-167)?)?\.png|wapi-pocket-(?:icon|maskable)-v303-[0-9]+\.png)$/.test(url.pathname);
+ if(!page&&!asset)return;
+ if(asset){e.respondWith(caches.match(req).then(hit=>hit||fetch(req).then(res=>{if(res.ok)e.waitUntil(caches.open(CACHE).then(c=>c.put(req,res.clone())).catch(()=>{}));return res})));return}
+ e.respondWith(Promise.race([fetch(req).then(res=>{if(res.ok)e.waitUntil(caches.open(CACHE).then(c=>c.put(req,res.clone())).catch(()=>{}));return res}),new Promise((_,reject)=>setTimeout(()=>reject(Error('timeout')),3000))]).catch(()=>caches.match(req).then(hit=>hit||caches.match('./index.html'))));
 });

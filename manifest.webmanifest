@@ -1,7 +1,7 @@
 {
   "name": "WAPI POCKET · WAPILOT",
   "short_name": "WAPI POCKET",
-  "description": "WAPI POCKET V3.0.2 — identité hexagonale et fonctionnalités terrain",
+  "description": "WAPI POCKET V3.0.3 — correction robuste du logo et des icônes",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",
@@ -11,19 +11,19 @@
   "lang": "fr-BE",
   "icons": [
     {
-      "src": "./icons/wp-v302-192.png",
+      "src": "./wapi-pocket-icon-v303-192.png",
       "sizes": "192x192",
       "type": "image/png",
       "purpose": "any"
     },
     {
-      "src": "./icons/wp-v302-512.png",
+      "src": "./wapi-pocket-icon-v303-512.png",
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "any"
     },
     {
-      "src": "./icons/wp-v302-maskable.png",
+      "src": "./wapi-pocket-maskable-v303-512.png",
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "maskable"
