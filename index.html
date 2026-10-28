@@ -2,16 +2,16 @@
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#f7f9fc"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="description" content="WAPI POCKET — compagnon mobile WAPILOT"><title>WAPI POCKET · WAPILOT</title>
 <meta name="apple-mobile-web-app-title" content="WAPI POCKET"><meta name="application-name" content="WAPI POCKET">
-<link rel="manifest" href="./manifest.webmanifest?v=301">
-<link rel="apple-touch-icon" sizes="152x152" href="./icons/wp-v301-apple-152.png">
-<link rel="apple-touch-icon" sizes="167x167" href="./icons/wp-v301-apple-167.png">
-<link rel="apple-touch-icon" sizes="180x180" href="./apple-touch-icon-v301.png">
-<link rel="icon" type="image/png" sizes="192x192" href="./icons/wp-v301-192.png">
-<link rel="stylesheet" href="./styles.css?v=301">
-<script defer src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script><script defer src="./gps.js?v=301"></script><script defer src="./app.js?v=301"></script><script defer src="./mobile_modules.js?v=301"></script><script defer src="./pocket_plus.js?v=301"></script>
+<link rel="manifest" href="./manifest.webmanifest?v=302">
+<link rel="apple-touch-icon" sizes="152x152" href="./icons/wp-v302-apple-152.png">
+<link rel="apple-touch-icon" sizes="167x167" href="./icons/wp-v302-apple-167.png">
+<link rel="apple-touch-icon" sizes="180x180" href="./apple-touch-icon-v302.png">
+<link rel="icon" type="image/png" sizes="192x192" href="./icons/wp-v302-192.png">
+<link rel="stylesheet" href="./styles.css?v=302">
+<script defer src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script><script defer src="./gps.js?v=302"></script><script defer src="./app.js?v=302"></script><script defer src="./mobile_modules.js?v=302"></script><script defer src="./pocket_plus.js?v=302"></script>
 </head><body>
 <div id="screen-login" class="login-screen">
- <div class="login-wrap"><div class="login-brand"><svg xmlns="http://www.w3.org/2000/svg" class="brand-symbol" width="46" height="46" viewBox="0 0 48 48"><rect x="2" y="2" width="44" height="44" rx="13" fill="#087445"/><path d="M11 17.5 17.4 32 24 19.5 30.6 32 37 17.5" fill="none" stroke="#fff" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"/><path d="M24 10.5v6.2" stroke="#BFE8D1" stroke-width="2.5" stroke-linecap="round"/><path d="m24 8 3 4h-6l3-4Z" fill="#fff"/><circle cx="24" cy="37" r="2" fill="#BFE8D1"/></svg><span>WAPI POCKET<small>WAPILOT · Votre espace mobile</small></span></div>
+ <div class="login-wrap"><div class="login-brand"><img class="brand-symbol" src="./icons/wp-v302-192.png" width="46" height="46" alt="Logo WAPI POCKET - smartphone et orbite verte"><span>WAPI POCKET<small>WAPILOT · Votre espace mobile</small></span></div>
  <section class="panel login-panel"><h1>Bienvenue</h1><p class="muted">Connectez-vous avec <b>vos identifiants habituels WAPILOT</b>.</p>
  <form id="login-form"><label>E-mail professionnel<input name="email" type="email" autocomplete="username" required placeholder="adresse@dl-groupe.be"></label>
  <label>Mot de passe<input name="password" type="password" autocomplete="current-password" required placeholder="Votre mot de passe"></label>
@@ -19,7 +19,7 @@
  <button class="link" id="btn-reset" type="button">Mot de passe oublié ?</button><p id="login-message" role="status" class="small status-text"></p></section>
  <div class="tiny muted centered">Accès professionnel · Données partagées avec WAPILOT</div></div></div>
 <div id="app" class="app hidden">
- <header class="topbar"><div class="brand-lockup"><svg xmlns="http://www.w3.org/2000/svg" class="brand-symbol" width="46" height="46" viewBox="0 0 48 48"><rect x="2" y="2" width="44" height="44" rx="13" fill="#087445"/><path d="M11 17.5 17.4 32 24 19.5 30.6 32 37 17.5" fill="none" stroke="#fff" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"/><path d="M24 10.5v6.2" stroke="#BFE8D1" stroke-width="2.5" stroke-linecap="round"/><path d="m24 8 3 4h-6l3-4Z" fill="#fff"/><circle cx="24" cy="37" r="2" fill="#BFE8D1"/></svg><span><b>WAPI POCKET</b><small id="user-title">Connecté à WAPILOT</small></span></div><div class="head-actions"><button id="global-search" class="round search-trigger" title="Chercher une copropriété" aria-label="Chercher une copropriété"><svg viewBox="0 0 24 24" width="21" height="21" stroke="currentColor" stroke-width="2" fill="none" aria-hidden="true"><circle cx="10.8" cy="10.8" r="6.8"/><path d="m16 16 5 5"/></svg></button><button id="plus-hub" class="round" aria-label="Outils de terrain" title="Outils de terrain">▧</button><button id="sync" class="round" aria-label="Actualiser">↻</button><button id="account" class="round avatar" aria-label="Compte">●</button></div></header>
+ <header class="topbar"><div class="brand-lockup"><img class="brand-symbol" src="./icons/wp-v302-192.png" width="46" height="46" alt="Logo WAPI POCKET - smartphone et orbite verte"><span><b>WAPI POCKET</b><small id="user-title">Connecté à WAPILOT</small></span></div><div class="head-actions"><button id="global-search" class="round search-trigger" title="Chercher une copropriété" aria-label="Chercher une copropriété"><svg viewBox="0 0 24 24" width="21" height="21" stroke="currentColor" stroke-width="2" fill="none" aria-hidden="true"><circle cx="10.8" cy="10.8" r="6.8"/><path d="m16 16 5 5"/></svg></button><button id="plus-hub" class="round" aria-label="Outils de terrain" title="Outils de terrain">▧</button><button id="sync" class="round" aria-label="Actualiser">↻</button><button id="account" class="round avatar" aria-label="Compte">●</button></div></header>
  <div id="context" class="context hidden"><span id="context-name"></span><button id="clear-context" aria-label="Retirer filtre">×</button></div>
  <div id="banner" class="banner hidden" role="status"></div>
  <main id="main" class="main" tabindex="-1"></main>
